@@ -25,14 +25,19 @@ var callback = {
 		var sql = res.sql;
 		var qdName = res.qdName;
 		var reportBool = res.reportBool;
-		debugger;
 		//2BD4D0FA65634F279448B79E8B18D514 method id
 		var body = "<sql>"+sql+"</sql>";
 		body += "<qdName>"+qdName+"</qdName>";
 		body += "<reportBool>"+reportBool+"</reportBool>";
 
 		var serverRes = aras.IomInnovator.applyMethod("labs_sqlToReport",body)
-		alert("Items were successfully created!")
+		//parse result
+		if (serverRes.dom.all[2].innerHTML == "success"){
+					alert("Items were successfully created!")
+		}else{
+					alert("There was an issue with QD and report generation. Error: "+ serverRes.dom.all[2].innerHTML)
+
+		}
 	}
 };
 

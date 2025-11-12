@@ -8,7 +8,7 @@ var sql = this.getProperty("sql");
 var qdName = this.getProperty("qdName");
 var reportText = this.getProperty("reportBool");
 var reportBool = false;
-if (reportText == "on")
+if (reportText == "true")
     reportBool = true;
 
 var SqlToReportOptions = new SqlToReportOptions();
@@ -17,10 +17,13 @@ SqlToReportOptions.Title = qdName;
 SqlToReportOptions.PrettyAlias = true;
 SqlToReportOptions.GenerateReport = reportBool;
 
-
 var success = Generate(sql,inn,SqlToReportOptions);
+if (success == "success"){
+    return inn.newResult("success");
+}else{
+    return inn.newResult(success);
 
-return this;
+}
 }
 
 public class SqlToReportOptions
@@ -35,7 +38,7 @@ public class SqlToReportOptions
     public string RptReport;
 }
 
-public static bool Generate(string sql, Innovator inn, SqlToReportOptions options)
+public static string Generate(string sql, Innovator inn, SqlToReportOptions options)
         {
 
             QueryDefinition qryDef = new QueryDefinition();
@@ -56,7 +59,7 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
 
                 // Show the error message in a MessageBox
                 //MessageBox.Show(errors, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
+                return errors;
             }
 
             var sqlScript = (TSqlScript)select;
@@ -67,13 +70,13 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
                 {
                     if (ProcessSqlSelectStatement(sqlStatement, qryDef) == false)
                     {
-                        return false;
+                        return "error";
                     }
                 }
                 else
                 {
                     //MessageBox.Show($"Query type not supported: {sqlStatement.GetType()}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return false;
+                    return $"Query type not supported: {sqlStatement.GetType()}";
                 }
             }
 
@@ -83,12 +86,12 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
             if (qryDefItem.isError())
             {
                 //MessageBox.Show($"Error writing Query Definition: {qryDefItem.getErrorDetail()}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return true;
+                return $"Error writing Query Definition: {qryDefItem.getErrorDetail()}";
             }
             else if (options.GenerateReport == false)
             {
                 //MessageBox.Show($"QueryDefinition has been successfully generated!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                return true;
+                return "success";
             }
 
             if (options.GenerateReport)
@@ -99,28 +102,28 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
                     if (writeReportDefResult.isError())
                     {
                         //MessageBox.Show($"Error writing Report Definition: {writeReportDefResult.getErrorDetail()}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return true;
+                        return $"Error writing Report Definition: {writeReportDefResult.getErrorDetail()}";
                     }
 
                     //MessageBox.Show($"Report has been successfully generated!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return true;
+                    return "success";
                 }
                 catch (Exception ex)
                 {
                     //MessageBox.Show($"Error writing Report Definition: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return true;
+                    return $"Error writing Report Definition: {ex.Message}";
                 }
             }
 
             //MessageBox.Show("Something went wrong...", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            return false;
+            return "error";
         }
 
         private static bool ProcessSqlSelectStatement(TSqlStatement sqlStatement, QueryDefinition qryDef)
         {
-            if (ExtractTablesAndAliases(((Microsoft.SqlServer.TransactSql.ScriptDom.QuerySpecification)((Microsoft.SqlServer.TransactSql.ScriptDom.SelectStatement)sqlStatement).QueryExpression).FromClause.TableReferences, qryDef)) 
+            if (ExtractTablesAndAliases(((Microsoft.SqlServer.TransactSql.ScriptDom.QuerySpecification)((Microsoft.SqlServer.TransactSql.ScriptDom.SelectStatement)sqlStatement).QueryExpression).FromClause.TableReferences, qryDef) == "success") 
             {
-                if (ExtractTableProperties(sqlStatement, qryDef))
+                if (ExtractTableProperties(sqlStatement, qryDef) == "success")
                 {
                    return ExtractWhereDefinition(((Microsoft.SqlServer.TransactSql.ScriptDom.QuerySpecification)((Microsoft.SqlServer.TransactSql.ScriptDom.SelectStatement)sqlStatement).QueryExpression).WhereClause, qryDef);
                 }
@@ -129,7 +132,7 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
             return false;
         }
 
-        static bool ExtractTablesAndAliases(IList<TableReference> tableReferences, QueryDefinition qryDef)
+        static string ExtractTablesAndAliases(IList<TableReference> tableReferences, QueryDefinition qryDef)
         {
             try
             {
@@ -169,7 +172,7 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
                             if (binaryExpressionType != "and")
                             {
                                 //MessageBox.Show("OR Expression within join is not yet supported", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                                return false;
+                                return "OR Expression within join is not yet supported";
                             }
 
 
@@ -228,13 +231,13 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
                         SetWhereDefinition(whereDefinitions, parentTable);
                     }
                 }
-                return true;
+                return "success";
 
             }
             catch (Exception ex)
             {
                 //MessageBox.Show($"Error extracting tables and aliases, please review your SQL Statement!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
+                return "Error extracting tables and aliases, please review your SQL Statement!";
             }
             
         }
@@ -262,7 +265,7 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
             return true;
         }
 
-        private static bool ExtractTableProperties(TSqlStatement sqlStatement, QueryDefinition qryDef)
+        private static string ExtractTableProperties(TSqlStatement sqlStatement, QueryDefinition qryDef)
         {
             try
             {
@@ -281,17 +284,17 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
                     else
                     {
                         //MessageBox.Show($"Table not found for property {propDef.QualifiedName}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return false;
+                        return $"Table not found for property {propDef.QualifiedName}";
                     }
 
                 }
 
-                return true;
+                return "success";
             }
             catch (Exception ex)
             {
                 //MessageBox.Show($"Error extracting table properties, please review your SQL Statement!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
+                return $"Error extracting table properties, please review your SQL Statement!";
             }
 
         }
@@ -317,6 +320,7 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
 
         private static Item WriteQueryDefinition(Innovator inn, QueryDefinition qryDef, SqlToReportOptions options)
         {
+
             Item qryDefDelete = inn.newItem("qry_QueryDefinition", "delete");
             qryDefDelete.setAttribute("where", $"[qry_QueryDefinition].name = '{options.Name}'");
             qryDefDelete = qryDefDelete.apply();
@@ -335,11 +339,18 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
                 var itemType = inn.newItem("ItemType", "get");
                 itemType.setProperty("name", itemToFind);
                 itemType = itemType.apply();
-
+                //checking for itemtype with/without spaces
                 if (itemType.isError())
                 {
+                    var newItem = inn.newItem("ItemType", "get");
+                    newItem.setProperty("name", itemToFind.Replace(" ", ""));
+                    newItem = itemType.apply();
+                    if (newItem.isError()){
+                        return null;
+                    }else{
+                        itemType = newItem;
+                    }
                     //MessageBox.Show($"ItemType {itemToFind} not found", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return null;
                 }
 
                 if (options.PrettyAlias)
@@ -414,7 +425,7 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
             if (qryDefItem.isError())
             {
                 //MessageBox.Show($"Error saving Query Definition: {qryDefItem.getErrorDetail()}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
+                return inn.newResult($"Error saving Query Definition: {qryDefItem.getErrorDetail()}");
             }
 
             return qryDefItem;
@@ -494,7 +505,7 @@ public static bool Generate(string sql, Innovator inn, SqlToReportOptions option
             if (rptReport.isError())
             {
                 //MessageBox.Show($"Error saving Report Definition: {rptReport.getErrorDetail()}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
+                return inn.newResult($"Error saving Report Definition: {rptReport.getErrorDetail()}");
             }
 
 

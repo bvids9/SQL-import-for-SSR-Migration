@@ -3,8 +3,7 @@
   <execution_allowed_to keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</execution_allowed_to>
   <method_code><![CDATA[var sql = getFieldByName("SQL").getElementsByTagName("textarea")[0].value;
 var qdName = getFieldByName("qdName").getElementsByTagName("input")[0].value;
-var reportBool = getFieldByName("reportBool").getElementsByTagName("input")[0].value;
-
+var reportBool = getFieldByName("reportBool").getElementsByTagName("input")[0].checked;
 result = top.aras.newObject();
 result.sql = sql;
 result.qdName = qdName;

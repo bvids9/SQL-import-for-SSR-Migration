@@ -4,9 +4,10 @@ This pacakge imports an Action which allows you to take a SQL query and convert 
 
 The intended use of this is to migrate Self Service Reports (SSR) to the new Reporting capability. Instructions on how to export your SSRs as SQL queries will be included in the usage instructions below.
 
-## Project Details
+## Known Limitations
+There is a known limitation of this project. Calculated fields is a feature in SSR which is not currently supported in the new Reporting. Due to this any SSRs including calculated fields will fail during migration. Please remove any calculated fields before attempting migration.
 
-**Built Using:** C# .NET
+## Project Details
 
 > Please note that each release of this project is version-dependent. To avoid potential errors, please ensure that you download the release of this project corresponding to your installed version of Aras Innovator.
 
@@ -14,12 +15,14 @@ The intended use of this is to migrate Self Service Reports (SSR) to the new Rep
 Release | Notes
 --------|--------
 [V1.0](https://github.com/ArasLabs/SQL-import-for-SSR-Migration/releases/tag/V1.0) | First release.
+[V2.0](https://github.com/ArasLabs/SQL-import-for-SSR-Migration/releases/tag/V2.0) | Bug Fixes and improved error handling.
 
 #### Supported Aras Versions
 
 Project | Aras
 --------|------
 [v1.0](https://github.com/ArasLabs/SQL-import-for-SSR-Migration/releases/tag/V1.0)| Releases 28-31
+[V2.0](https://github.com/ArasLabs/SQL-import-for-SSR-Migration/releases/tag/V2.0) | Releases 28-35
 
 ## Installation
 
@@ -28,7 +31,7 @@ Project | Aras
 
 ### Pre-requisites
 
-1. Aras Innovator installed (Releases 28-31)
+1. Aras Innovator installed (Releases 28-35)
 
 ### Install Steps
 
